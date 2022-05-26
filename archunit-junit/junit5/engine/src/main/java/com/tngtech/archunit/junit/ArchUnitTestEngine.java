@@ -216,7 +216,7 @@ public final class ArchUnitTestEngine extends HierarchicalTestEngine<ArchUnitEng
 
     @Override
     protected ArchUnitEngineExecutionContext createExecutionContext(ExecutionRequest request) {
-        return new ArchUnitEngineExecutionContext();
+        return new ArchUnitEngineExecutionContext(request.getEngineExecutionListener(), request.getConfigurationParameters());
     }
 
     private Optional<Class<?>> maybeLoadClass(String name) {
