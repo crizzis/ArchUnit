@@ -4,7 +4,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
-import com.tngtech.archunit.tooling.engines.surefire.MavenSurefireEngine;
 import org.apache.maven.surefire.shared.io.FileUtils;
 
 public abstract class TemporaryDirectoryUtils {
