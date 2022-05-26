@@ -42,8 +42,8 @@ public class ArchUnitToolingTest extends BaseTest {
 
     static Stream<Class<?>> fixtures() {
         return Stream.of(
-                ArchJUnit4Test.class
-                , ArchJUnit5Test.class
+                ArchJUnit4Test.class,
+                ArchJUnit5Test.class
         );
     }
 }
