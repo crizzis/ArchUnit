@@ -36,7 +36,7 @@ sourceSets {
     }
 }
 
-copy {
+task copyFixtureSources(type: Copy) {
     into new File(project.sourceSets.testFixtures.output.resourcesDir, '@sources')
     from(project.sourceSets.testFixtures.java) {
         include '**/*.java'
@@ -186,6 +186,6 @@ clean {
 }
 
 test {
-    dependsOn publishJUnitDepsToMavenLocal, publishCustomSurefireVersionToMavenLocal, downloadCustomGradleVersion
+    dependsOn copyFixtureSources, publishJUnitDepsToMavenLocal, publishCustomSurefireVersionToMavenLocal, downloadCustomGradleVersion
     useJUnitPlatform()
 }
