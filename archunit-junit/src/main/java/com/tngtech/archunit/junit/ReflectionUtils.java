@@ -88,7 +88,7 @@ public class ReflectionUtils {
         return collector.collected;
     }
 
-    static <T> T newInstanceOf(Class<T> type) {
+    public static <T> T newInstanceOf(Class<T> type) {
         return com.tngtech.archunit.base.ReflectionUtils.newInstanceOf(type);
     }
 

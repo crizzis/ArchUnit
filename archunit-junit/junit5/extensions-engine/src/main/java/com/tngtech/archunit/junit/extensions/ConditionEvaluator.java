@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tngtech.archunit.junit;
+package com.tngtech.archunit.junit.extensions;
 
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExecutionCondition;
@@ -22,7 +22,7 @@ import org.junit.platform.commons.JUnitException;
 
 class ConditionEvaluator {
 
-    ConditionEvaluationResult evaluate(ArchUnitEngineExecutionContext context, ExtensionContext extensionContext) {
+    ConditionEvaluationResult evaluate(ExtensibleArchUnitEngineExecutionContext context, ExtensionContext extensionContext) {
         return context.getExtensions(ExecutionCondition.class).stream()
                 .map(condition -> evaluate(condition, extensionContext))
                 .filter(ConditionEvaluationResult::isDisabled)

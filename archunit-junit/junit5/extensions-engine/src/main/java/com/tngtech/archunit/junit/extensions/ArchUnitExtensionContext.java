@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tngtech.archunit.junit;
+package com.tngtech.archunit.junit.extensions;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
@@ -33,12 +33,12 @@ import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_METHOD;
 
 class ArchUnitExtensionContext implements ExtensionContext {
 
-    private final AbstractArchUnitTestDescriptor descriptor;
-    private final ArchUnitEngineExecutionContext context;
+    private final ExtensibleTestDescriptorDecorator<?> descriptor;
+    private final ExtensibleArchUnitEngineExecutionContext context;
 
     public ArchUnitExtensionContext(
-            AbstractArchUnitTestDescriptor descriptor,
-            ArchUnitEngineExecutionContext execution) {
+            ExtensibleTestDescriptorDecorator<?> descriptor,
+            ExtensibleArchUnitEngineExecutionContext execution) {
         this.descriptor = descriptor;
         this.context = execution;
     }
@@ -46,8 +46,8 @@ class ArchUnitExtensionContext implements ExtensionContext {
     @Override
     public Optional<ExtensionContext> getParent() {
         return descriptor.getParent()
-                .map(AbstractArchUnitTestDescriptor.class::cast)
-                .map(descriptor -> new ArchUnitExtensionContext(descriptor, context));
+                .map(ExtensibleTestDescriptorDecorator.class::cast)
+                .map(descriptor -> new ArchUnitExtensionContext((ExtensibleTestDescriptorDecorator<?>) descriptor, context));
     }
 
     @Override
@@ -141,9 +141,10 @@ class ArchUnitExtensionContext implements ExtensionContext {
         return org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
     }
 
+    @SuppressWarnings("unchecked")
     private Optional<Map<NamespacedStore.NamespacedKey, Object>> getParentStore() {
         return descriptor.getParent()
-                .map(AbstractArchUnitTestDescriptor.class::cast)
-                .map(AbstractArchUnitTestDescriptor::getStore);
+                .map(ExtensibleTestDescriptorDecorator.class::cast)
+                .map(ExtensibleTestDescriptorDecorator::getStore);
     }
 }

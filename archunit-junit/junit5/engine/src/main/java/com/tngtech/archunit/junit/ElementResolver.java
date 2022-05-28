@@ -36,7 +36,7 @@ import static com.tngtech.archunit.junit.ArchUnitTestDescriptor.CLASS_SEGMENT_TY
 import static com.tngtech.archunit.junit.ArchUnitTestDescriptor.FIELD_SEGMENT_TYPE;
 import static com.tngtech.archunit.junit.ArchUnitTestDescriptor.METHOD_SEGMENT_TYPE;
 
-class ElementResolver {
+public class ElementResolver {
     private final ArchUnitEngineDescriptor engineDescriptor;
     private final UniqueId processedId;
     private final Deque<UniqueId.Segment> segmentsToResolve;

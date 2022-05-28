@@ -8,31 +8,18 @@ repositories {
     }
 }
 
-ext.moduleName = 'com.tngtech.archunit.junit5.engine'
-
 ext.minimumJavaVersion = JavaVersion.VERSION_1_8
+
+ext.moduleName = 'com.tngtech.archunit.junit5.extensionsengine'
 
 dependencies {
     api project(path: ':archunit')
     api project(path: ':archunit-junit5-api')
-    api project(path: ':archunit-junit5-engine-api')
+    api project(path: ':archunit-junit5-engine')
+    api project(path: ':archunit-junit5-extensions-api')
     implementation project(path: ':archunit-junit')
     dependency.addGuava { dependencyNotation, config -> implementation(dependencyNotation, config) }
     implementation dependency.slf4j
-    implementation ':surefire-junit-platform-3.0.0-custom-api'
-    implementation ':gradle-testing-junit-platform-7.5'
-
-    testImplementation project(path: ':archunit', configuration: 'tests')
-    testImplementation dependency.assertj
-    testImplementation dependency.mockito
-    testImplementation dependency.junit5JupiterApi
-
-    testRuntimeOnly dependency.junit5JupiterEngine
-}
-
-gradle.projectsEvaluated {
-    compileJava.dependsOn project(':archunit-junit5-api').finishArchive
-    compileJava.dependsOn project(':archunit-junit5-engine-api').finishArchive
 }
 
 javadoc {
@@ -40,16 +27,6 @@ javadoc {
 }
 sourcesJar {
     from project(':archunit-junit').sourceSets.main.allSource
-}
-
-archUnitTest {
-    hasSlowTests = true
-}
-
-test {
-    useJUnitPlatform() {
-        excludeEngines 'archunit'
-    }
 }
 
 shadowJar {
@@ -66,7 +43,9 @@ shadowJar {
 
 def configureDependencies = { deps ->
     deps.children().removeIf { dep ->
-        dep.scope.text() != 'compile' || !(dep.artifactId.text() in ['archunit', 'archunit-junit5-api', 'archunit-junit5-engine-api'])
+        dep.scope.text() != 'compile' || !(dep.artifactId.text() in ['archunit'])
     }
 }
 this.with project(':archunit-junit').configureJUnitArchive(configureDependencies)
+
+

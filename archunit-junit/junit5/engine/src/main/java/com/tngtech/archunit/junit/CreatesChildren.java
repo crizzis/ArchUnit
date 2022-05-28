@@ -15,6 +15,6 @@
  */
 package com.tngtech.archunit.junit;
 
-interface CreatesChildren {
-    void createChildren(ElementResolver resolver);
+public interface CreatesChildren {
+    default void createChildren(ElementResolver resolver) {}
 }

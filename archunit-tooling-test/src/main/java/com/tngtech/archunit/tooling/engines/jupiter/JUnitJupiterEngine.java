@@ -11,10 +11,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.tngtech.archunit.junit.FieldSource;
+import com.tngtech.archunit.junit.extensions.ArchUnitExtensibleTestEngine;
 import com.tngtech.archunit.tooling.ExecutedTestFile.TestResult;
 import com.tngtech.archunit.tooling.TestEngine;
 import com.tngtech.archunit.tooling.TestFile;
 import com.tngtech.archunit.tooling.TestReport;
+import org.junit.jupiter.engine.JupiterTestEngine;
 import org.junit.platform.engine.DiscoverySelector;
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.engine.TestSource;
@@ -24,8 +26,10 @@ import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestIdentifier;
+import org.junit.platform.launcher.core.LauncherConfig;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 import org.junit.platform.launcher.core.LauncherFactory;
+import org.junit.vintage.engine.VintageTestEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +42,10 @@ public enum JUnitJupiterEngine implements TestEngine {
 
     private static final Logger LOG = LoggerFactory.getLogger(JUnitJupiterEngine.class);
 
-    private final Launcher launcher = LauncherFactory.create();
+    private final Launcher launcher = LauncherFactory.create(LauncherConfig.builder()
+                    .enableTestEngineAutoRegistration(false)
+                    .addTestEngines(new ArchUnitExtensibleTestEngine(), new JupiterTestEngine(), new VintageTestEngine())
+            .build());
 
     @Override
     public TestReport execute(Set<TestFile> testFiles) {

@@ -24,7 +24,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-class AnnotatedElementComposite implements AnnotatedElement {
+public class AnnotatedElementComposite implements AnnotatedElement {
     private final List<AnnotatedElement> children;
 
     private AnnotatedElementComposite(List<AnnotatedElement> children) {
@@ -39,7 +39,7 @@ class AnnotatedElementComposite implements AnnotatedElement {
         return children;
     }
 
-    <T extends AnnotatedElement> Optional<T> findChild(Class<T> type) {
+    public <T extends AnnotatedElement> Optional<T> findChild(Class<T> type) {
         return children.stream()
                 .filter(type::isInstance)
                 .map(type::cast)

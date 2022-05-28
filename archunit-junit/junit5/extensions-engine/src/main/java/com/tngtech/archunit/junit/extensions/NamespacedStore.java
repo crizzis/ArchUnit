@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tngtech.archunit.junit;
+package com.tngtech.archunit.junit.extensions;
 
 import java.util.Collections;
 import java.util.Map;
@@ -30,7 +30,7 @@ class NamespacedStore implements Store {
     private final ExtensionContext.Namespace namespace;
     private final Map<NamespacedKey, Object> parent;
 
-    NamespacedStore(ExtensionContext.Namespace namespace,
+    public NamespacedStore(ExtensionContext.Namespace namespace,
             Map<NamespacedKey, Object> storage,
             Map<NamespacedKey, Object> parent) {
         this.namespace = namespace;

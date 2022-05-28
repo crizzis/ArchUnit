@@ -15,8 +15,11 @@
  */
 package com.tngtech.archunit.junit;
 
-import org.junit.platform.engine.support.hierarchical.EngineExecutionContext;
+import java.lang.annotation.Annotation;
+import java.util.Collection;
 
-public class ArchUnitEngineExecutionContext implements EngineExecutionContext {
+public interface AnnotationConfigFactory {
 
+    Collection<Class<? extends Annotation>> getIgnoredAnnotations();
+    Collection<Class<? extends Annotation>> getTagAnnotations();
 }

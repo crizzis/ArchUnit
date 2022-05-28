@@ -27,19 +27,21 @@ import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.support.descriptor.ClassSource;
 import org.junit.platform.engine.support.descriptor.MethodSource;
+import org.junit.platform.engine.support.hierarchical.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.tngtech.archunit.junit.ArchTestInitializationException.WRAP_CAUSE;
 import static com.tngtech.archunit.junit.DisplayNameResolver.determineDisplayName;
 import static com.tngtech.archunit.junit.ReflectionUtils.getAllFields;
 import static com.tngtech.archunit.junit.ReflectionUtils.getAllMethods;
-import static com.tngtech.archunit.junit.ReflectionUtils.getValueOrThrowException;
 import static com.tngtech.archunit.junit.ReflectionUtils.invokeMethod;
 import static com.tngtech.archunit.junit.ReflectionUtils.withAnnotation;
 
-class ArchUnitTestDescriptor extends AbstractArchUnitTestDescriptor implements CreatesChildren {
+public class ArchUnitTestDescriptor<
+        EXECUTION_CONTEXT extends ArchUnitEngineExecutionContext,
+        CHILD_DESCRIPTOR_SUPERTYPE extends TestDescriptor & Node<EXECUTION_CONTEXT> & CreatesChildren>
+        extends AbstractArchUnitTestDescriptor<EXECUTION_CONTEXT, CHILD_DESCRIPTOR_SUPERTYPE> implements CreatesChildren {
     private static final Logger LOG = LoggerFactory.getLogger(ArchUnitTestDescriptor.class);
 
     static final String CLASS_SEGMENT_TYPE = "class";
@@ -50,29 +52,44 @@ class ArchUnitTestDescriptor extends AbstractArchUnitTestDescriptor implements C
     @SuppressWarnings("FieldMayBeFinal") // We want to change this in tests
     private ClassCache classCache;
 
-    private ArchUnitTestDescriptor(ElementResolver resolver, Class<?> testClass, ClassCache classCache) {
-        super(resolver.getUniqueId(), testClass.getName(), ClassSource.from(testClass), testClass);
+    public ArchUnitTestDescriptor(
+            TestDescriptorFactory<EXECUTION_CONTEXT, CHILD_DESCRIPTOR_SUPERTYPE> factory,
+            AnnotationConfigFactory annotationConfigFactory,
+            ElementResolver resolver,
+            Class<?> testClass,
+            ClassCache classCache) {
+        super(factory, annotationConfigFactory, resolver.getUniqueId(), testClass.getName(), ClassSource.from(testClass), testClass);
         this.testClass = testClass;
         this.classCache = classCache;
     }
 
-    static void resolve(TestDescriptor parent, ElementResolver resolver, ClassCache classCache) {
+    static <T extends ArchUnitEngineExecutionContext, S extends TestDescriptor & Node<T> & CreatesChildren> void resolve(
+            TestDescriptorFactory<T, S> factory,
+            TestDescriptor parent,
+            ElementResolver resolver,
+            ClassCache classCache) {
+
         resolver.resolveClass()
                 .ifRequestedAndResolved(CreatesChildren::createChildren)
-                .ifRequestedButUnresolved((clazz, childResolver) -> createTestDescriptor(parent, classCache, clazz, childResolver));
+                .ifRequestedButUnresolved((clazz, childResolver) -> createTestDescriptor(factory, parent, classCache, clazz, childResolver));
     }
 
-    private static void createTestDescriptor(TestDescriptor parent, ClassCache classCache, Class<?> clazz, ElementResolver childResolver) {
+    private static <T extends ArchUnitEngineExecutionContext, S extends TestDescriptor & Node<T> & CreatesChildren> void createTestDescriptor(
+            TestDescriptorFactory<T, S> factory,
+            TestDescriptor parent,
+            ClassCache classCache,
+            Class<?> clazz,
+            ElementResolver childResolver) {
+
         if (clazz.getAnnotation(AnalyzeClasses.class) == null) {
             LOG.warn("Class {} is not annotated with @{} and thus cannot run as a top level test. "
                             + "This warning can be ignored if {} is only used as part of a rules library included via {}.in({}.class).",
                     clazz.getName(), AnalyzeClasses.class.getSimpleName(),
                     clazz.getSimpleName(), ArchTests.class.getSimpleName(), clazz.getSimpleName());
-
             return;
         }
 
-        ArchUnitTestDescriptor classDescriptor = new ArchUnitTestDescriptor(childResolver, clazz, classCache);
+        S classDescriptor = factory.forTestClass(childResolver, clazz, classCache);
         parent.addChild(classDescriptor);
         classDescriptor.createChildren(childResolver);
     }
@@ -94,39 +111,7 @@ class ArchUnitTestDescriptor extends AbstractArchUnitTestDescriptor implements C
 
     private void resolveMethod(ElementResolver resolver, Supplier<JavaClasses> classes, Method method) {
         resolver.resolveMethod(method)
-                .ifUnresolved(childResolver -> addChild(new ArchUnitMethodDescriptor(getUniqueId(), method, classes)));
-    }
-
-    private static void resolveChildren(
-            TestDescriptor parent, ElementResolver resolver, Field field, Supplier<JavaClasses> classes) {
-
-        if (ArchTests.class.isAssignableFrom(field.getType())) {
-            resolveArchRules(parent, resolver, field, classes);
-        } else {
-            parent.addChild(new ArchUnitRuleDescriptor(resolver.getUniqueId(), getValue(field), classes, field));
-        }
-    }
-
-    private static <T> T getValue(Field field) {
-        return getValueOrThrowException(field, field.getDeclaringClass(), WRAP_CAUSE);
-    }
-
-    private static void resolveArchRules(
-            TestDescriptor parent, ElementResolver resolver, Field field, Supplier<JavaClasses> classes) {
-
-        DeclaredArchTests archTests = getDeclaredArchTests(field);
-
-        resolver.resolveClass(archTests.getDefinitionLocation())
-                .ifRequestedAndResolved(CreatesChildren::createChildren)
-                .ifRequestedButUnresolved((clazz, childResolver) -> {
-                    ArchUnitArchTestsDescriptor rulesDescriptor = new ArchUnitArchTestsDescriptor(childResolver, archTests, classes, field);
-                    parent.addChild(rulesDescriptor);
-                    rulesDescriptor.createChildren(childResolver);
-                });
-    }
-
-    private static DeclaredArchTests getDeclaredArchTests(Field field) {
-        return new DeclaredArchTests(getValue(field));
+                .ifUnresolved(childResolver -> addChild(factory.forTestMethod(getUniqueId(), method, classes)));
     }
 
     @Override
@@ -135,16 +120,24 @@ class ArchUnitTestDescriptor extends AbstractArchUnitTestDescriptor implements C
     }
 
     @Override
-    public void after(ArchUnitEngineExecutionContext context) {
+    public void after(EXECUTION_CONTEXT context) {
         classCache.clear(testClass);
     }
 
-    private static class ArchUnitRuleDescriptor extends AbstractArchUnitTestDescriptor {
+    public static class ArchUnitRuleDescriptor<T extends ArchUnitEngineExecutionContext, S extends TestDescriptor & Node<T> & CreatesChildren>
+            extends AbstractArchUnitTestDescriptor<T, S> {
+
         private final ArchRule rule;
         private final Supplier<JavaClasses> classes;
 
-        ArchUnitRuleDescriptor(UniqueId uniqueId, ArchRule rule, Supplier<JavaClasses> classes, Field field) {
-            super(uniqueId, determineDisplayName(field.getName()), FieldSource.from(field), field);
+        public ArchUnitRuleDescriptor(
+                TestDescriptorFactory<T, S> factory,
+                AnnotationConfigFactory annotationConfigFactory,
+                UniqueId uniqueId,
+                ArchRule rule,
+                Supplier<JavaClasses> classes,
+                Field field) {
+            super(factory, annotationConfigFactory, uniqueId, determineDisplayName(field.getName()), FieldSource.from(field), field);
             this.rule = rule;
             this.classes = classes;
         }
@@ -155,18 +148,25 @@ class ArchUnitTestDescriptor extends AbstractArchUnitTestDescriptor implements C
         }
 
         @Override
-        public ArchUnitEngineExecutionContext execute(ArchUnitEngineExecutionContext context, DynamicTestExecutor dynamicTestExecutor) {
+        public T execute(T context, DynamicTestExecutor dynamicTestExecutor) {
             rule.check(classes.get());
             return context;
         }
     }
 
-    private static class ArchUnitMethodDescriptor extends AbstractArchUnitTestDescriptor {
+    public static class ArchUnitMethodDescriptor <T extends ArchUnitEngineExecutionContext, S extends TestDescriptor & Node<T> & CreatesChildren>
+            extends AbstractArchUnitTestDescriptor<T, S> {
+
         private final Method method;
         private final Supplier<JavaClasses> classes;
 
-        ArchUnitMethodDescriptor(UniqueId uniqueId, Method method, Supplier<JavaClasses> classes) {
-            super(uniqueId.append("method", method.getName()),
+        public ArchUnitMethodDescriptor(
+                TestDescriptorFactory<T, S> factory,
+                AnnotationConfigFactory annotationConfigFactory,
+                UniqueId uniqueId,
+                Method method,
+                Supplier<JavaClasses> classes) {
+            super(factory, annotationConfigFactory, uniqueId.append("method", method.getName()),
                     determineDisplayName(method.getName()), MethodSource.from(method), method);
             validate(method);
 
@@ -188,20 +188,27 @@ class ArchUnitTestDescriptor extends AbstractArchUnitTestDescriptor implements C
         }
 
         @Override
-        public ArchUnitEngineExecutionContext execute(ArchUnitEngineExecutionContext context, DynamicTestExecutor dynamicTestExecutor) {
-
+        public T execute(T context, DynamicTestExecutor dynamicTestExecutor) {
             invokeMethod(method, method.getDeclaringClass(), classes.get());
             return context;
         }
     }
 
-    private static class ArchUnitArchTestsDescriptor extends AbstractArchUnitTestDescriptor implements CreatesChildren {
+    public static class ArchUnitArchTestsDescriptor<T extends ArchUnitEngineExecutionContext, S extends TestDescriptor & Node<T> & CreatesChildren>
+            extends AbstractArchUnitTestDescriptor<T, S>
+            implements CreatesChildren {
+
         private final DeclaredArchTests archTests;
         private final Supplier<JavaClasses> classes;
 
-        ArchUnitArchTestsDescriptor(ElementResolver resolver, DeclaredArchTests archTests, Supplier<JavaClasses> classes, Field field) {
+        public ArchUnitArchTestsDescriptor(
+                final TestDescriptorFactory<T, S> factory,
+                final AnnotationConfigFactory annotationConfigFactory,
+                ElementResolver resolver,
+                DeclaredArchTests archTests,
+                Supplier<JavaClasses> classes, Field field) {
 
-            super(resolver.getUniqueId(),
+            super(factory, annotationConfigFactory, resolver.getUniqueId(),
                     archTests.getDisplayName(),
                     ClassSource.from(archTests.getDefinitionLocation()),
                     field,
@@ -218,7 +225,7 @@ class ArchUnitTestDescriptor extends AbstractArchUnitTestDescriptor implements C
 
             archTests.handleMethods(method ->
                     resolver.resolve(METHOD_SEGMENT_TYPE, method.getName(), childResolver ->
-                            addChild(new ArchUnitMethodDescriptor(getUniqueId(), method, classes))));
+                            addChild(factory.forTestMethod(getUniqueId(), method, classes))));
         }
 
         @Override
@@ -227,7 +234,7 @@ class ArchUnitTestDescriptor extends AbstractArchUnitTestDescriptor implements C
         }
     }
 
-    private static class DeclaredArchTests {
+    public static class DeclaredArchTests {
         private final ArchTests archTests;
 
         DeclaredArchTests(ArchTests archTests) {

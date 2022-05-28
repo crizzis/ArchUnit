@@ -2,7 +2,13 @@ plugins {
     id 'archunit.java-release-conventions'
 }
 
-ext.moduleName = 'com.tngtech.archunit.junit5.api'
+repositories {
+    flatDir {
+        dirs "${rootDir}/inlineDeps/"
+    }
+}
+
+ext.moduleName = 'com.tngtech.archunit.junit5.extensionsapi'
 
 ext.minimumJavaVersion = JavaVersion.VERSION_1_8
 
@@ -10,6 +16,7 @@ dependencies {
     api project(path: ':archunit')
     api project(path: ':archunit-junit', configuration: 'archJunitApi')
     api dependency.junitPlatformCommons
+    api dependency.junit5JupiterApi
 }
 
 javadoc {

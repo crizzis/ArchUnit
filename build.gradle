@@ -95,6 +95,8 @@ ext {
             project(':archunit'),
             project(':archunit-junit'),
             project(':archunit-junit4'),
+            project(':archunit-junit5-extensions-api'),
+            project(':archunit-junit5-extensions-engine'),
             project(':archunit-junit5-api'),
             project(':archunit-junit5-engine-api'),
             project(':archunit-junit5-engine'),

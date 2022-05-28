@@ -25,13 +25,12 @@ import com.tngtech.archunit.PublicAPI;
 import com.tngtech.archunit.PublicAPI.State;
 import com.tngtech.archunit.PublicAPI.Usage;
 import com.tngtech.archunit.junit.internal.AdapterFor;
-import com.tngtech.archunit.junit.ArchTest;
 import org.junit.jupiter.api.condition.JRE;
 import org.junit.jupiter.api.condition.OS;
 
 
 /**
- * A collection of wrappers for declaring {@code DisabledIfXxx} annotations on {@link ArchTest} annotated fields
+ * A collection of wrappers for declaring {@code DisabledIfXxx} annotations on {@code ArchTest} - annotated fields
  */
 @Target({ })
 @Retention(RetentionPolicy.RUNTIME)

@@ -5,7 +5,7 @@ plugins {
 rootProject.name = 'archunit-root'
 
 include 'archunit', 'archunit-integration-test', 'archunit-java-modules-test',
-        'archunit-junit', 'archunit-junit4', 'archunit-junit5-api', 'archunit-junit5-engine-api', 'archunit-junit5-engine', 'archunit-junit5',
+        'archunit-junit', 'archunit-junit4', 'archunit-junit5-api', 'archunit-junit5-engine-api', 'archunit-junit5-extensions-api', 'archunit-junit5-extensions-engine', 'archunit-junit5-engine', 'archunit-junit5',
         'archunit-example:example-plain', 'archunit-example:example-junit4', 'archunit-example:example-junit5', 'archunit-maven-test', 'archunit-tooling-test',
         'docs'
 
@@ -20,6 +20,8 @@ project(':archunit-junit4').projectDir = file('archunit-junit/junit4')
 project(':archunit-junit5-api').projectDir = file('archunit-junit/junit5/api')
 project(':archunit-junit5-engine-api').projectDir = file('archunit-junit/junit5/engine-api')
 project(':archunit-junit5-engine').projectDir = file('archunit-junit/junit5/engine')
+project(':archunit-junit5-extensions-api').projectDir = file('archunit-junit/junit5/extensions-api')
+project(':archunit-junit5-extensions-engine').projectDir = file('archunit-junit/junit5/extensions-engine')
 project(':archunit-junit5').projectDir = file('archunit-junit/junit5/aggregator')
 
 gradleEnterprise {

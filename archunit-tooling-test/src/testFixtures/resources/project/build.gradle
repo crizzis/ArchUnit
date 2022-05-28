@@ -12,12 +12,16 @@ dependencies {
     implementation 'com.tngtech.archunit:archunit-junit4:@junitDependency.version@'
     implementation 'com.tngtech.archunit:archunit-junit5:@junitDependency.version@'
     implementation 'com.tngtech.archunit:archunit-junit5-engine:@junitDependency.version@'
+    implementation 'com.tngtech.archunit:archunit-junit5-extensions-engine:@junitDependency.version@'
+    implementation 'com.tngtech.archunit:archunit-junit5-extensions-api:@junitDependency.version@'
     testImplementation 'org.junit.vintage:junit-vintage-engine:5.8.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
 }
 
 test {
-    useJUnitPlatform()
+    useJUnitPlatform {
+        includeEngines 'archunit-extensible', 'junit-jupiter', 'junit-vintage'
+    }
 
     jvmArgs = ['--add-opens', 'java.base/java.util=ALL-UNNAMED']
     ignoreFailures = true

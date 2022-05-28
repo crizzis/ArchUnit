@@ -51,7 +51,7 @@ import static com.tngtech.archunit.junit.ReflectionUtils.newInstanceOf;
  * The cache will hold imported classes as long as there is sufficient memory, and reuse them, if the same
  * locations (i.e. URLs) are imported.
  */
-class ClassCache {
+public class ClassCache {
     @VisibleForTesting
     final Map<Class<?>, JavaClasses> cachedByTest = new ConcurrentHashMap<>();
     @VisibleForTesting

@@ -49,6 +49,13 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0-custom</version>
+                <configuration>
+                    <includeJUnit5Engines>
+                        <engine>archunit-extensible</engine>
+                        <engine>junit-jupiter</engine>
+                        <engine>junit-vintage</engine>
+                    </includeJUnit5Engines>
+                </configuration>
             </plugin>
         </plugins>
     </build>

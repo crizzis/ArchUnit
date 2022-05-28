@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 import com.tngtech.archunit.junit.internal.AdapterFor;
 import org.junit.platform.commons.support.AnnotationSupport;
 
-abstract class AnnotationUtils {
+public abstract class AnnotationUtils {
     private AnnotationUtils() {}
 
     /**
@@ -43,7 +43,12 @@ abstract class AnnotationUtils {
     @SafeVarargs
     public static Stream<? extends Annotation> streamRepeatableAnnotations(AnnotatedElementComposite element, Class<? extends Annotation>... annotations) {
         return Arrays.stream(annotations)
-                .flatMap(annotationType -> streamRepeatableAnnotations(element, annotationType));
+                .flatMap(annotationType -> streamRepeatableAnnotation(element, annotationType));
+    }
+
+    public static Stream<? extends Annotation> streamRepeatableAnnotations(AnnotatedElementComposite element, Collection<Class<? extends Annotation>> annotations) {
+        return annotations.stream()
+                .flatMap(annotationType -> streamRepeatableAnnotation(element, annotationType));
     }
 
     /**
@@ -61,6 +66,11 @@ abstract class AnnotationUtils {
                 .flatMap(annotationType -> streamAnnotations(element, annotationType));
     }
 
+    public static Stream<? extends Annotation> streamAnnotations(AnnotatedElementComposite element, Collection<Class<? extends Annotation>> annotations) {
+        return annotations.stream()
+                .flatMap(annotationType -> streamAnnotation(element, annotationType));
+    }
+
     public static Annotation dereferenceAnnotation(Annotation source) {
         return getAdapterTarget(source)
                 .map(targetType -> (Annotation) proxyAnnotation(source, targetType))
@@ -71,14 +81,14 @@ abstract class AnnotationUtils {
         return new DereferencedAnnotatedElementWrapper(target);
     }
 
-    private static Stream<? extends Annotation> streamAnnotations(AnnotatedElementComposite element, Class<? extends Annotation> annotationType) {
+    private static Stream<? extends Annotation> streamAnnotation(AnnotatedElementComposite element, Class<? extends Annotation> annotationType) {
         return element.getChildren().stream()
                 .map(child -> AnnotationSupport.findAnnotation(child, annotationType))
                 .filter(Optional::isPresent)
                 .map(Optional::get);
     }
 
-    private static Stream<? extends Annotation> streamRepeatableAnnotations(AnnotatedElementComposite element,
+    private static Stream<? extends Annotation> streamRepeatableAnnotation(AnnotatedElementComposite element,
             Class<? extends Annotation> annotationType) {
         return element.getChildren().stream()
                 .map(child -> AnnotationSupport.findRepeatableAnnotations(child, annotationType))

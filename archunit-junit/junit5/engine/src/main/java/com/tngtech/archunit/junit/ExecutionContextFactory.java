@@ -15,8 +15,9 @@
  */
 package com.tngtech.archunit.junit;
 
-import org.junit.platform.engine.support.hierarchical.EngineExecutionContext;
+import org.junit.platform.engine.ExecutionRequest;
 
-public class ArchUnitEngineExecutionContext implements EngineExecutionContext {
+public interface ExecutionContextFactory {
 
+    ArchUnitEngineExecutionContext createExecutionContext(ExecutionRequest request);
 }

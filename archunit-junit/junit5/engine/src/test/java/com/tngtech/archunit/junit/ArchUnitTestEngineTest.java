@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 import com.google.common.collect.ImmutableSet;
 import com.tngtech.archunit.ArchConfiguration;
 import com.tngtech.archunit.core.domain.JavaClasses;
-import com.tngtech.archunit.junit.ArchUnitTestEngine.SharedCache;
+import com.tngtech.archunit.junit.AbstractArchUnitTestEngine.SharedCache;
 import com.tngtech.archunit.junit.testexamples.ClassWithPrivateTests;
 import com.tngtech.archunit.junit.testexamples.ComplexMetaTags;
 import com.tngtech.archunit.junit.testexamples.ComplexRuleLibrary;
