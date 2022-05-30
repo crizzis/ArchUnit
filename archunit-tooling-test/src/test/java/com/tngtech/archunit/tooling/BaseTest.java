@@ -28,6 +28,7 @@ public abstract class BaseTest {
         ExecutedTestFile actual = findResult(report, testFile.getFixture());
 
         // then
+        assertThat(actual.hasInitializationError()).isFalse();
         assertThat(actual.getResult("shouldReportSuccess").get()).isEqualTo(SUCCESS);
         assertThat(actual.getResult("shouldReportFailure").get()).isEqualTo(FAILURE);
         assertThat(actual.getResult("shouldReportError").get()).isEqualTo(engine.reportsErrors() ? ERROR : FAILURE);
@@ -43,6 +44,7 @@ public abstract class BaseTest {
         ExecutedTestFile actual = findResult(report, testFile.getFixture());
 
         // then
+        assertThat(actual.hasInitializationError()).isFalse();
         assertThat(actual.getResult("shouldReportSuccess").isPresent()).isTrue();
         assertThat(actual.getResults()).hasSize(1);
     }
@@ -60,6 +62,7 @@ public abstract class BaseTest {
         });
 
         // then
+        assertThat(actual.hasInitializationError()).isFalse();
         assertThat(actual.getResult("shouldBeSkippedConditionally").get()).isEqualTo(result);
     }
 

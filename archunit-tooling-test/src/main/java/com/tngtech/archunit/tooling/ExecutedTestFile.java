@@ -38,6 +38,10 @@ public class ExecutedTestFile {
         results.put(testCase, result);
     }
 
+    public boolean hasInitializationError() {
+        return getResult("initializationError").isPresent();
+    }
+
     public enum TestResult {
         SUCCESS,
         FAILURE,
