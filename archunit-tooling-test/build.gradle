@@ -60,6 +60,7 @@ dependencies {
     implementation project(path: ':archunit-junit5-engine')
     implementation project(path: ':archunit-junit5-extensions-api')
     implementation project(path: ':archunit-junit5-extensions-engine')
+    implementation project(path: ':archunit-junit4')
     implementation 'com.github.stefanbirkner:system-lambda:1.2.1'
     implementation 'org.apache.maven.shared:maven-invoker:3.1.0'
     implementation 'org.apache.maven.surefire:surefire-report-parser:3.0.0-M5'

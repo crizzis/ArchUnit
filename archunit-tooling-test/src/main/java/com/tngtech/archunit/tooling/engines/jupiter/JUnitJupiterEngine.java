@@ -44,7 +44,7 @@ public enum JUnitJupiterEngine implements TestEngine {
 
     private final Launcher launcher = LauncherFactory.create(LauncherConfig.builder()
                     .enableTestEngineAutoRegistration(false)
-                    .addTestEngines(new ArchUnitExtensibleTestEngine(), new JupiterTestEngine(), new VintageTestEngine())
+                    .addTestEngines(new ArchUnitExtensibleTestEngine())
             .build());
 
     @Override

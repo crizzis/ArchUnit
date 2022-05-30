@@ -20,7 +20,7 @@ dependencies {
 
 test {
     useJUnitPlatform {
-        includeEngines 'archunit-extensible', 'junit-jupiter', 'junit-vintage'
+        includeEngines 'archunit-extensible'
     }
 
     jvmArgs = ['--add-opens', 'java.base/java.util=ALL-UNNAMED']

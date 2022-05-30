@@ -33,21 +33,32 @@ import com.tngtech.archunit.junit.conditions.Conditions;
  * <br>
  * Usage with Gradle: <br>
  * <pre><code>
+ *     dependencies{
+ *         testImplementation 'com.tngtech.archunit:archunit-junit5-extensions-engine:${archunit.version}'
+ *     }
+ *
+ *     ...
  *      test {
  *          useJUnitPlatform {
- *              includeEngines 'archunit-extensible', 'junit-jupiter'
+ *              includeEngines 'archunit-extensible'
  *          }
  *      }
  * </code></pre>
  * <br>
  * Usage with Maven Surefire: <br>
  * <pre><code>
+ *     &lt;dependency&gt;
+ *         &lt;groupId&gt;com.tngtech.archunit&lt;/groupId&gt;
+ *         &lt;artifactId&gt;archunit-junit5-extensions-engine&lt;/artifactId&gt;
+ *         &lt;version&gt;${archunit.version}&lt;/version&gt;
+ *         &lt;scope&gt;test&lt;/scope&gt; &lt;!-- or add as plugin dependency --&gt;
+ *     &lt;/dependency&gt;
+ *     ...
  *     &lt;plugin&gt;
  *         &lt;artifactId&gt;maven-surefire-plugin&lt;/artifactId&gt;
  *         &lt;configuration&gt;
  *             &lt;includeJUnit5Engines&gt;
  *                 &lt;engine>archunit-extensible&lt;/engine&gt;
- *                 &lt;engine>junit-jupiter&lt;/engine&gt;
  *             &lt;/includeJUnit5Engines&gt;
  *         &lt;/configuration&gt;
  *     &lt;/plugin&gt;

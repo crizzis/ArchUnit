@@ -30,6 +30,16 @@
             <version>@junitDependency.version@</version>
         </dependency>
         <dependency>
+            <groupId>com.tngtech.archunit</groupId>
+            <artifactId>archunit-junit5-extensions-api</artifactId>
+            <version>@junitDependency.version@</version>
+        </dependency>
+        <dependency>
+            <groupId>com.tngtech.archunit</groupId>
+            <artifactId>archunit-junit5-extensions-engine</artifactId>
+            <version>@junitDependency.version@</version>
+        </dependency>
+        <dependency>
             <groupId>org.junit.vintage</groupId>
             <artifactId>junit-vintage-engine</artifactId>
             <version>5.8.2</version>
@@ -52,8 +62,6 @@
                 <configuration>
                     <includeJUnit5Engines>
                         <engine>archunit-extensible</engine>
-                        <engine>junit-jupiter</engine>
-                        <engine>junit-vintage</engine>
                     </includeJUnit5Engines>
                 </configuration>
             </plugin>

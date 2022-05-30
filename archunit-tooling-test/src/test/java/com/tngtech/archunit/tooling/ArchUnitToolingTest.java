@@ -25,7 +25,6 @@ public class ArchUnitToolingTest extends BaseTest {
 
     @CartesianTest
     @CartesianTest.MethodFactory("enginesFixturesAndIgnoreEnvVariables")
-    @Disabled
     void shouldConditionallyIgnoreTest(TestEngine engine, Class<?> fixture, Map.Entry<String, ExecutedTestFile.TestResult> resultForEnvVar) throws Exception {
         super.shouldConditionallyIgnoreTest(engine, fixture, resultForEnvVar);
     }

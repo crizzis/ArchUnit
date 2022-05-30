@@ -18,8 +18,6 @@ package com.tngtech.archunit.junit.extensions;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -28,27 +26,22 @@ import com.tngtech.archunit.junit.AbstractArchUnitTestDescriptor;
 import com.tngtech.archunit.junit.AnnotatedElementComposite;
 import com.tngtech.archunit.junit.AnnotationUtils;
 import com.tngtech.archunit.junit.CreatesChildren;
-import com.tngtech.archunit.junit.ElementResolver;
 import com.tngtech.archunit.junit.ReflectionUtils;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.Extension;
 import org.junit.platform.engine.TestDescriptor;
-import org.junit.platform.engine.TestSource;
-import org.junit.platform.engine.TestTag;
-import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.support.hierarchical.Node;
 
 class ExtensibleTestDescriptorDecorator<
         CHILD_DESCRIPTOR_SUPERTYPE extends TestDescriptor & Node<ExtensibleArchUnitEngineExecutionContext> & CreatesChildren>
-        implements TestDescriptor, Node<ExtensibleArchUnitEngineExecutionContext>, CreatesChildren {
+        extends DelegatingTestDescriptor<ExtensibleArchUnitEngineExecutionContext, AbstractArchUnitTestDescriptor<ExtensibleArchUnitEngineExecutionContext, CHILD_DESCRIPTOR_SUPERTYPE>> {
 
     private final ConditionEvaluator conditionEvaluator = new ConditionEvaluator();
     private final Map<NamespacedStore.NamespacedKey, Object> store = new ConcurrentHashMap<>();
-    private final AbstractArchUnitTestDescriptor<ExtensibleArchUnitEngineExecutionContext, CHILD_DESCRIPTOR_SUPERTYPE> decorated;
 
     ExtensibleTestDescriptorDecorator(final AbstractArchUnitTestDescriptor<ExtensibleArchUnitEngineExecutionContext, CHILD_DESCRIPTOR_SUPERTYPE> decorated) {
-        this.decorated = decorated;
+        super(decorated);
     }
 
     Map<NamespacedStore.NamespacedKey, Object> getStore() {
@@ -56,18 +49,18 @@ class ExtensibleTestDescriptorDecorator<
     }
 
     AnnotatedElementComposite getAnnotatedElement() {
-        return decorated.getAnnotatedElement();
+        return getDecorated().getAnnotatedElement();
     }
 
     @Override
-    public ExtensibleArchUnitEngineExecutionContext prepare(ExtensibleArchUnitEngineExecutionContext context) throws Exception {
+    public ExtensibleArchUnitEngineExecutionContext prepare(ExtensibleArchUnitEngineExecutionContext context) {
         getExtensionsFromTestSource().forEach(context::registerExtension);
         return context;
     }
 
     @Override
     public SkipResult shouldBeSkipped(ExtensibleArchUnitEngineExecutionContext context) {
-        SkipResult skipResult = decorated.shouldBeSkipped(context);
+        SkipResult skipResult = getDecorated().shouldBeSkipped(context);
         if (!skipResult.isSkipped()) {
             return toSkipResult(conditionEvaluator.evaluate(
                     context,
@@ -86,77 +79,10 @@ class ExtensibleTestDescriptorDecorator<
 
     @SuppressWarnings("unchecked")
     protected Collection<Extension> getExtensionsFromTestSource() {
-        return ((Stream<ExtendWith>) AnnotationUtils.streamRepeatableAnnotations(decorated.getAnnotatedElement(), ExtendWith.class))
+        return ((Stream<ExtendWith>) AnnotationUtils.streamRepeatableAnnotations(getDecorated().getAnnotatedElement(), ExtendWith.class))
                 .map(ExtendWith::value)
                 .flatMap(Arrays::stream)
                 .map(ReflectionUtils::newInstanceOf)
                 .collect(Collectors.toList());
-    }
-
-    // delegate methods
-
-    @Override
-    public UniqueId getUniqueId() {
-        return decorated.getUniqueId();
-    }
-
-    @Override
-    public String getDisplayName() {
-        return decorated.getDisplayName();
-    }
-
-    @Override
-    public Set<TestTag> getTags() {
-        return decorated.getTags();
-    }
-
-    @Override
-    public Optional<TestSource> getSource() {
-        return decorated.getSource();
-    }
-
-    @Override
-    public Optional<TestDescriptor> getParent() {
-        return decorated.getParent();
-    }
-
-    @Override
-    public void setParent(TestDescriptor parent) {
-        decorated.setParent(parent);
-    }
-
-    @Override
-    public Set<? extends TestDescriptor> getChildren() {
-        return decorated.getChildren();
-    }
-
-    @Override
-    public void addChild(TestDescriptor descriptor) {
-        decorated.addChild(descriptor);
-    }
-
-    @Override
-    public void removeChild(TestDescriptor descriptor) {
-        decorated.removeChild(descriptor);
-    }
-
-    @Override
-    public void removeFromHierarchy() {
-        decorated.removeFromHierarchy();
-    }
-
-    @Override
-    public Type getType() {
-        return decorated.getType();
-    }
-
-    @Override
-    public Optional<? extends TestDescriptor> findByUniqueId(UniqueId uniqueId) {
-        return decorated.findByUniqueId(uniqueId);
-    }
-
-    @Override
-    public void createChildren(ElementResolver resolver) {
-        decorated.createChildren(resolver);
     }
 }
