@@ -106,6 +106,9 @@ public enum MavenSurefireEngine implements TestEngine {
         request.setPomFile(mavenProject.getPomXml().toFile());
         request.setGoals(Collections.singletonList(goal));
         request.setProperties(propertiesWithTest(toTestProperty(testFiles)));
+        request.setMavenOpts("-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8000");
+        request.setDebug(false);
+        request.setShowErrors(true);
         return request;
     }
 

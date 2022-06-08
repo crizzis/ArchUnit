@@ -63,6 +63,7 @@ dependencies {
     implementation 'org.apache.maven.surefire:surefire-report-parser:3.0.0-M5'
     implementation 'commons-io:commons-io:2.11.0'
     implementation 'org.gradle:gradle-tooling-api:7.3-20210825160000+0000'
+    implementation project(path: ':archunit-junit4')
 
     compileOnly 'com.github.spotbugs:spotbugs-annotations:4.5.3'
 

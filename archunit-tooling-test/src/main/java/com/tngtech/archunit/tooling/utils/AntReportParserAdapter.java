@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-import com.google.common.base.Strings;
 import com.tngtech.archunit.tooling.ExecutedTestFile;
 import com.tngtech.archunit.tooling.TestReport;
 import org.apache.maven.plugin.surefire.log.api.NullConsoleLogger;
@@ -41,7 +40,6 @@ public class AntReportParserAdapter {
         ExecutedTestFile result = new ExecutedTestFile(reportTestSuite.getFullClassName());
         reportTestSuite.getTestCases()
                 .stream()
-                .filter(reportTestCase -> !Strings.isNullOrEmpty(reportTestCase.getName()))
                 .forEach(reportTestCase -> result.addResult(reportTestCase.getName(), resolveResult(reportTestCase)));
         return result;
     }
