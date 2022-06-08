@@ -30,6 +30,7 @@ import com.tngtech.archunit.Internal;
 import com.tngtech.archunit.base.MayResolveTypesViaReflection;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
+import com.tngtech.archunit.junit.surefire.SurefireTestNameFilter;
 import org.junit.platform.engine.EngineDiscoveryRequest;
 import org.junit.platform.engine.ExecutionRequest;
 import org.junit.platform.engine.Filter;
@@ -44,6 +45,8 @@ import org.junit.platform.engine.discovery.PackageSelector;
 import org.junit.platform.engine.discovery.UniqueIdSelector;
 import org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine;
 import org.junit.platform.engine.support.hierarchical.ThrowableCollector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static com.tngtech.archunit.junit.ReflectionUtils.getAllFields;
 import static com.tngtech.archunit.junit.ReflectionUtils.getAllMethods;
@@ -67,6 +70,8 @@ import static java.util.stream.Collectors.toList;
 @Internal
 public final class ArchUnitTestEngine extends HierarchicalTestEngine<ArchUnitEngineExecutionContext> {
     static final String UNIQUE_ID = "archunit";
+
+    private static final Logger LOG = LoggerFactory.getLogger(ArchUnitTestEngine.class);
 
     private static final Collection<String> ABORTING_THROWABLE_NAMES = Arrays.asList(
             "org.junit.internal.AssumptionViolatedException",
@@ -94,6 +99,8 @@ public final class ArchUnitTestEngine extends HierarchicalTestEngine<ArchUnitEng
     @Override
     public TestDescriptor discover(EngineDiscoveryRequest discoveryRequest, UniqueId uniqueId) {
         ArchUnitEngineDescriptor result = new ArchUnitEngineDescriptor(uniqueId);
+        TestSourceFilter additionalFilter = resolveAdditionalFilter(discoveryRequest);
+        result.setAdditionalFilter(additionalFilter);
 
         resolveRequestedClasspathRoot(discoveryRequest, uniqueId, result);
         resolveRequestedPackages(discoveryRequest, uniqueId, result);
@@ -105,12 +112,23 @@ public final class ArchUnitTestEngine extends HierarchicalTestEngine<ArchUnitEng
         return result;
     }
 
+    private TestSourceFilter resolveAdditionalFilter(EngineDiscoveryRequest discoveryRequest) {
+        try {
+            if (SurefireTestNameFilter.appliesTo(discoveryRequest)) {
+                return new SurefireTestNameFilter(discoveryRequest);
+            }
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            LOG.warn("Received error trying to apply Surefire filter", e);
+        }
+        return TestSourceFilter.NOOP;
+    }
+
     private void resolveRequestedClasspathRoot(EngineDiscoveryRequest discoveryRequest, UniqueId uniqueId, ArchUnitEngineDescriptor result) {
         Stream<JavaClass> classes = discoveryRequest.getSelectorsByType(ClasspathRootSelector.class).stream()
                 .flatMap(this::getContainedClasses);
         filterCandidatesAndLoadClasses(classes, discoveryRequest)
                 .forEach(clazz -> ArchUnitTestDescriptor.resolve(
-                        result, ElementResolver.create(result, uniqueId, clazz), cache.get()));
+                        result, ElementResolver.create(result, uniqueId, clazz), cache.get(), result.getAdditionalFilter()));
     }
 
     private void resolveRequestedPackages(EngineDiscoveryRequest discoveryRequest, UniqueId uniqueId, ArchUnitEngineDescriptor result) {
@@ -121,7 +139,7 @@ public final class ArchUnitTestEngine extends HierarchicalTestEngine<ArchUnitEng
 
         filterCandidatesAndLoadClasses(classes, discoveryRequest)
                 .forEach(clazz -> ArchUnitTestDescriptor.resolve(
-                        result, ElementResolver.create(result, uniqueId, clazz), cache.get()));
+                        result, ElementResolver.create(result, uniqueId, clazz), cache.get(), result.getAdditionalFilter()));
     }
 
     private Stream<Class<?>> filterCandidatesAndLoadClasses(Stream<JavaClass> classes, EngineDiscoveryRequest discoveryRequest) {
@@ -136,28 +154,30 @@ public final class ArchUnitTestEngine extends HierarchicalTestEngine<ArchUnitEng
                 .map(ClassSelector::getJavaClass)
                 .filter(this::isArchUnitTestCandidate)
                 .forEach(clazz -> ArchUnitTestDescriptor.resolve(
-                        result, ElementResolver.create(result, uniqueId, clazz), cache.get()));
+                        result, ElementResolver.create(result, uniqueId, clazz), cache.get(), result.getAdditionalFilter()));
     }
 
     private void resolveRequestedMethods(EngineDiscoveryRequest discoveryRequest, UniqueId uniqueId, ArchUnitEngineDescriptor result) {
         discoveryRequest.getSelectorsByType(MethodSelector.class).stream()
                 .filter(s -> s.getJavaMethod().isAnnotationPresent(ArchTest.class))
                 .forEach(selector -> ArchUnitTestDescriptor.resolve(
-                        result, ElementResolver.create(result, uniqueId, selector.getJavaClass(), selector.getJavaMethod()), cache.get()));
+                        result, ElementResolver.create(result, uniqueId, selector.getJavaClass(), selector.getJavaMethod()), cache.get(),
+                        result.getAdditionalFilter()));
     }
 
     private void resolveRequestedFields(EngineDiscoveryRequest discoveryRequest, UniqueId uniqueId, ArchUnitEngineDescriptor result) {
         discoveryRequest.getSelectorsByType(FieldSelector.class).stream()
                 .filter(s -> s.getJavaField().isAnnotationPresent(ArchTest.class))
                 .forEach(selector -> ArchUnitTestDescriptor.resolve(
-                        result, ElementResolver.create(result, uniqueId, selector.getJavaClass(), selector.getJavaField()), cache.get()));
+                        result, ElementResolver.create(result, uniqueId, selector.getJavaClass(), selector.getJavaField()), cache.get(),
+                        result.getAdditionalFilter()));
     }
 
     private void resolveRequestedUniqueIds(EngineDiscoveryRequest discoveryRequest, UniqueId uniqueId, ArchUnitEngineDescriptor result) {
         discoveryRequest.getSelectorsByType(UniqueIdSelector.class).stream()
                 .filter(selector -> selector.getUniqueId().getEngineId().equals(Optional.of(getId())))
                 .forEach(selector -> ArchUnitTestDescriptor.resolve(
-                        result, ElementResolver.create(result, uniqueId, selector.getUniqueId()), cache.get()));
+                        result, ElementResolver.create(result, uniqueId, selector.getUniqueId()), cache.get(), result.getAdditionalFilter()));
     }
 
     private Stream<JavaClass> getContainedClasses(String[] packages) {

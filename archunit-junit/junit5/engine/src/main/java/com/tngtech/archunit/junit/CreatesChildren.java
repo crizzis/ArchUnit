@@ -16,5 +16,5 @@
 package com.tngtech.archunit.junit;
 
 interface CreatesChildren {
-    void createChildren(ElementResolver resolver);
+    void createChildren(ElementResolver resolver, TestSourceFilter filter);
 }

@@ -15,22 +15,22 @@
  */
 package com.tngtech.archunit.junit.surefire;
 
-import com.tngtech.archunit.junit.FieldSource;
 import org.junit.platform.engine.TestSource;
+import org.junit.platform.engine.support.descriptor.MethodSource;
 
-public class FieldSelectorFactory implements TestSelectorFactory {
+public class MethodSelectorFactory implements TestSelectorFactory {
     @Override
-    public boolean supports(TestSource testSource) {
-        return testSource instanceof FieldSource;
+    public boolean supports(TestSource source) {
+        return source instanceof MethodSource;
     }
 
     @Override
-    public String getContainerName(TestSource testSource) {
-        return ((FieldSource) testSource).getClassName();
+    public String getContainerName(TestSource source) {
+        return ((MethodSource) source).getClassName();
     }
 
     @Override
-    public String getSelectorName(TestSource testSource) {
-        return ((FieldSource) testSource).getFieldName();
+    public String getSelectorName(TestSource source) {
+        return ((MethodSource) source).getMethodName();
     }
 }

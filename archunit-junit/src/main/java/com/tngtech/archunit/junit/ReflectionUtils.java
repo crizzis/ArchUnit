@@ -102,7 +102,7 @@ public class ReflectionUtils {
         }
     }
 
-    static <T> T getValueOrThrowException(Field field, Class<?> fieldOwner, Function<Throwable, ? extends RuntimeException> exceptionConverter) {
+    public static <T> T getValueOrThrowException(Field field, Class<?> fieldOwner, Function<Throwable, ? extends RuntimeException> exceptionConverter) {
         try {
             if (Modifier.isStatic(field.getModifiers())) {
                 return getValue(field, null);

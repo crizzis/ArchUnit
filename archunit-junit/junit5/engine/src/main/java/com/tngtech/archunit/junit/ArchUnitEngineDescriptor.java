@@ -23,4 +23,14 @@ class ArchUnitEngineDescriptor extends EngineDescriptor implements Node<ArchUnit
     ArchUnitEngineDescriptor(UniqueId uniqueId) {
         super(uniqueId, "ArchUnit JUnit 5");
     }
+
+    private TestSourceFilter additionalFilter = TestSourceFilter.NOOP;
+
+    public void setAdditionalFilter(TestSourceFilter additionalFilter) {
+        this.additionalFilter = additionalFilter;
+    }
+
+    public TestSourceFilter getAdditionalFilter() {
+        return additionalFilter;
+    }
 }

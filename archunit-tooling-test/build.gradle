@@ -117,11 +117,6 @@ task removeFromMavenLocal {
             File file = resolveAgainstMavenLocal(getMavenRepoPath(project))
             deleteSafely file
         }
-
-        ['org/apache/maven/surefire', 'org/apache/maven/plugins/maven-surefire-plugin'].each { path ->
-            File file = resolveAgainstMavenLocal(path)
-            deleteSafely file
-        }
     }
 }
 
@@ -134,37 +129,6 @@ task publishJUnitDepsToMavenLocal {
     dependsOn ':archunit-junit5:publishMavenJavaPublicationToMavenLocal'
     dependsOn ':archunit-junit4:publishMavenJavaPublicationToMavenLocal'
     dependsOn ':archunit:publishMavenJavaPublicationToMavenLocal'
-}
-
-task chekoutCustomSurefireVersion {
-    group = 'other'
-    description = 'Checks out a custom version of Maven Surefire'
-    onlyIf { task ->
-        !(new File("${buildDir}/custom-github-deps/maven-surefire/pom.xml")).exists()
-    }
-    doLast {
-        grgit.clone(
-                dir: "${buildDir}/custom-github-deps/maven-surefire",
-                uri: 'https://github.com/crizzis/maven-surefire.git',
-                refToCheckout: 'maven-version')
-        copy {
-            into "${buildDir}/custom-github-deps/maven-surefire"
-            from(new File(project.sourceSets.testFixtures.resources.srcDirs[0], "project")) {
-                include '.mvn/wrapper/**'
-                include 'mvnw'
-            }
-        }
-    }
-}
-
-task publishCustomSurefireVersionToMavenLocal(type: Exec) {
-    group = 'other'
-    dependsOn chekoutCustomSurefireVersion
-    onlyIf { task ->
-        !resolveAgainstMavenLocal('org/apache/maven/surefire/surefire/3.0.0-custom').exists()
-    }
-    workingDir "${buildDir}/custom-github-deps/maven-surefire"
-    commandLine "./mvnw", "install", "-DskipTests"
 }
 
 task downloadCustomGradleVersion(type: Download) {
@@ -187,6 +151,6 @@ clean {
 }
 
 test {
-    dependsOn copyFixtureSources, publishJUnitDepsToMavenLocal, publishCustomSurefireVersionToMavenLocal, downloadCustomGradleVersion
+    dependsOn copyFixtureSources, publishJUnitDepsToMavenLocal, downloadCustomGradleVersion
     useJUnitPlatform()
 }
