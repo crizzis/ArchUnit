@@ -13,26 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tngtech.archunit.junit.gradle;
+package com.tngtech.archunit.junit.filtering;
 
-import com.tngtech.archunit.junit.FieldSource;
-import com.tngtech.archunit.junit.ReflectionUtils;
-import org.gradle.api.internal.tasks.testing.junitplatform.TestSelectorFactory;
 import org.junit.platform.engine.TestSource;
+import org.junit.platform.engine.support.descriptor.MethodSource;
 
-public class FieldSelectorFactory implements TestSelectorFactory {
+public class MethodSelectorFactory implements TestSelectorFactory {
     @Override
-    public boolean supports(TestSource testSource) {
-        return testSource.getClass().getName().equals(FieldSource.class.getName());
+    public boolean supports(TestSource source) {
+        return source instanceof MethodSource;
     }
 
     @Override
-    public String getContainerName(TestSource testSource) {
-        return ReflectionUtils.invokeMethod(testSource, "getClassName");
+    public String getContainerName(TestSource source) {
+        return ((MethodSource) source).getClassName();
     }
 
     @Override
-    public String getSelectorName(TestSource testSource) {
-        return ReflectionUtils.invokeMethod(testSource, "getFieldName");
+    public String getSelectorName(TestSource source) {
+        return ((MethodSource) source).getMethodName();
     }
 }

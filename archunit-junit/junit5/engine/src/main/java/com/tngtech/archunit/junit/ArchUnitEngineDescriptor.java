@@ -15,6 +15,7 @@
  */
 package com.tngtech.archunit.junit;
 
+import com.tngtech.archunit.junit.filtering.TestSourceFilter;
 import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.support.descriptor.EngineDescriptor;
 import org.junit.platform.engine.support.hierarchical.Node;

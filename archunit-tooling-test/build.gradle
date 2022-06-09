@@ -6,12 +6,6 @@ plugins {
     id "de.undercouch.download" version "5.0.2"
 }
 
-repositories {
-    flatDir {
-        dirs "${rootDir}/inlineDeps/"
-    }
-}
-
 ext.moduleName = 'com.tngtech.archunit.tooling'
 ext.minimumJavaVersion = JavaVersion.VERSION_1_9
 
@@ -131,14 +125,6 @@ task publishJUnitDepsToMavenLocal {
     dependsOn ':archunit:publishMavenJavaPublicationToMavenLocal'
 }
 
-task downloadCustomGradleVersion(type: Download) {
-    onlyIf { task ->
-        !(new File(project.sourceSets.main.output.resourcesDir, 'gradle-7.5-bin.zip').exists())
-    }
-    src 'https://filesend.io/8PdZ/gradle-7.5-bin.zip?download_token=6b1236a8b17cefff61063a4d4822f5b3c540a3a0c0d815eb6edcf799c83b11a1'
-    dest new File(project.sourceSets.main.output.resourcesDir, 'gradle-7.5-bin.zip')
-}
-
 gradle.taskGraph.whenReady { graph ->
     if (graph.hasTask(publishJUnitDepsToMavenLocal)) {
         def externalTests = graph.allTasks.findAll { task -> task.name.toLowerCase().endsWith("test") && !task.path.startsWith(":archunit-tooling-test:") }
@@ -151,6 +137,6 @@ clean {
 }
 
 test {
-    dependsOn copyFixtureSources, publishJUnitDepsToMavenLocal, downloadCustomGradleVersion
+    dependsOn copyFixtureSources, publishJUnitDepsToMavenLocal
     useJUnitPlatform()
 }

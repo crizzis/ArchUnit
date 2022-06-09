@@ -13,24 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tngtech.archunit.junit.surefire;
+package com.tngtech.archunit.junit.filtering;
 
+import com.tngtech.archunit.junit.FieldSource;
 import org.junit.platform.engine.TestSource;
-import org.junit.platform.engine.support.descriptor.MethodSource;
 
-public class MethodSelectorFactory implements TestSelectorFactory {
+public class FieldSelectorFactory implements TestSelectorFactory {
     @Override
-    public boolean supports(TestSource source) {
-        return source instanceof MethodSource;
+    public boolean supports(TestSource testSource) {
+        return testSource instanceof FieldSource;
     }
 
     @Override
-    public String getContainerName(TestSource source) {
-        return ((MethodSource) source).getClassName();
+    public String getContainerName(TestSource testSource) {
+        return ((FieldSource) testSource).getClassName();
     }
 
     @Override
-    public String getSelectorName(TestSource source) {
-        return ((MethodSource) source).getMethodName();
+    public String getSelectorName(TestSource testSource) {
+        return ((FieldSource) testSource).getFieldName();
     }
 }

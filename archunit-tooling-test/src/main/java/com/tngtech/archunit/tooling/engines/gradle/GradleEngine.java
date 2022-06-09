@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import com.tngtech.archunit.tooling.TestEngine;
 import com.tngtech.archunit.tooling.TestFile;
 import com.tngtech.archunit.tooling.TestReport;
-import com.tngtech.archunit.tooling.utils.ResourcesUtils;
 import com.tngtech.archunit.tooling.utils.AntReportParserAdapter;
 import com.tngtech.archunit.tooling.utils.TemporaryDirectoryUtils;
 import org.gradle.tooling.BuildLauncher;
@@ -41,7 +40,7 @@ public enum GradleEngine implements TestEngine {
         return withProjectRoot(projectRoot -> {
             projectLayout.applyTo(projectRoot);
             GradleConnector gradleConnector = GradleConnector.newConnector()
-                    .useDistribution(ResourcesUtils.getResourceUri("gradle-7.5-bin.zip"))
+                    .useGradleVersion("7.4.2")
                     .forProjectDirectory(projectRoot.toFile());
             try (ProjectConnection connection = gradleConnector.connect()) {
                 BuildLauncher launcher = prepareLauncher(testFiles, connection);

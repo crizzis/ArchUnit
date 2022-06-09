@@ -13,13 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tngtech.archunit.junit;
+package com.tngtech.archunit.junit.filtering;
 
+import com.tngtech.archunit.junit.ArchUnitTestEngine;
+import com.tngtech.archunit.junit.filtering.gradle.GradleTestNameFilter;
+import com.tngtech.archunit.junit.filtering.surefire.SurefireTestNameFilter;
+import org.junit.platform.engine.EngineDiscoveryRequest;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.TestSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @FunctionalInterface
 public interface TestSourceFilter {
+    Logger LOG = LoggerFactory.getLogger(ArchUnitTestEngine.class);
+
     TestSourceFilter NOOP = (descriptor -> true);
 
     default boolean shouldRun(TestDescriptor descriptor) {
@@ -29,4 +37,17 @@ public interface TestSourceFilter {
     }
 
     boolean shouldRun(TestSource source);
+
+    static TestSourceFilter forRequest(EngineDiscoveryRequest discoveryRequest) {
+        try {
+            if (SurefireTestNameFilter.appliesTo(discoveryRequest)) {
+                return new SurefireTestNameFilter(discoveryRequest);
+            } else if (GradleTestNameFilter.appliesTo(discoveryRequest)) {
+                return new GradleTestNameFilter(discoveryRequest);
+            }
+        } catch (Exception e) {
+            LOG.warn("Received error trying to apply test name filter from testing tool", e);
+        }
+        return TestSourceFilter.NOOP;
+    }
 }

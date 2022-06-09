@@ -30,7 +30,7 @@ import com.tngtech.archunit.Internal;
 import com.tngtech.archunit.base.MayResolveTypesViaReflection;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
-import com.tngtech.archunit.junit.surefire.SurefireTestNameFilter;
+import com.tngtech.archunit.junit.filtering.TestSourceFilter;
 import org.junit.platform.engine.EngineDiscoveryRequest;
 import org.junit.platform.engine.ExecutionRequest;
 import org.junit.platform.engine.Filter;
@@ -45,8 +45,6 @@ import org.junit.platform.engine.discovery.PackageSelector;
 import org.junit.platform.engine.discovery.UniqueIdSelector;
 import org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine;
 import org.junit.platform.engine.support.hierarchical.ThrowableCollector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static com.tngtech.archunit.junit.ReflectionUtils.getAllFields;
 import static com.tngtech.archunit.junit.ReflectionUtils.getAllMethods;
@@ -70,8 +68,6 @@ import static java.util.stream.Collectors.toList;
 @Internal
 public final class ArchUnitTestEngine extends HierarchicalTestEngine<ArchUnitEngineExecutionContext> {
     static final String UNIQUE_ID = "archunit";
-
-    private static final Logger LOG = LoggerFactory.getLogger(ArchUnitTestEngine.class);
 
     private static final Collection<String> ABORTING_THROWABLE_NAMES = Arrays.asList(
             "org.junit.internal.AssumptionViolatedException",
@@ -99,8 +95,7 @@ public final class ArchUnitTestEngine extends HierarchicalTestEngine<ArchUnitEng
     @Override
     public TestDescriptor discover(EngineDiscoveryRequest discoveryRequest, UniqueId uniqueId) {
         ArchUnitEngineDescriptor result = new ArchUnitEngineDescriptor(uniqueId);
-        TestSourceFilter additionalFilter = resolveAdditionalFilter(discoveryRequest);
-        result.setAdditionalFilter(additionalFilter);
+        result.setAdditionalFilter(TestSourceFilter.forRequest(discoveryRequest));
 
         resolveRequestedClasspathRoot(discoveryRequest, uniqueId, result);
         resolveRequestedPackages(discoveryRequest, uniqueId, result);
@@ -110,17 +105,6 @@ public final class ArchUnitTestEngine extends HierarchicalTestEngine<ArchUnitEng
         resolveRequestedUniqueIds(discoveryRequest, uniqueId, result);
 
         return result;
-    }
-
-    private TestSourceFilter resolveAdditionalFilter(EngineDiscoveryRequest discoveryRequest) {
-        try {
-            if (SurefireTestNameFilter.appliesTo(discoveryRequest)) {
-                return new SurefireTestNameFilter(discoveryRequest);
-            }
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            LOG.warn("Received error trying to apply Surefire filter", e);
-        }
-        return TestSourceFilter.NOOP;
     }
 
     private void resolveRequestedClasspathRoot(EngineDiscoveryRequest discoveryRequest, UniqueId uniqueId, ArchUnitEngineDescriptor result) {
