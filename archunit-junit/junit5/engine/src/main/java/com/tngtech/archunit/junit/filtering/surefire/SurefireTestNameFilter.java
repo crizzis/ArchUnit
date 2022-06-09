@@ -45,8 +45,9 @@ public class SurefireTestNameFilter extends AbstractTestNameFilter {
     }
 
     @Override
-    protected void initialize(PostDiscoveryFilter filter) throws Exception {
+    protected PostDiscoveryFilter initialize(PostDiscoveryFilter filter) throws Exception {
         this.resolver = Objects.requireNonNull(getTestListResolver(filter));
+        return filter;
     }
 
     @Override

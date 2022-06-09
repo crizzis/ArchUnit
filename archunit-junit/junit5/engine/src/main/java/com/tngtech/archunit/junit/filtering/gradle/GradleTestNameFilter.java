@@ -19,11 +19,13 @@ import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.Objects;
 
+import com.tngtech.archunit.junit.FieldSource;
 import com.tngtech.archunit.junit.filtering.AbstractTestNameFilter;
 import com.tngtech.archunit.junit.filtering.DuckTypedProxy;
 import com.tngtech.archunit.junit.filtering.TestSelectorFactory.TestSelector;
 import org.gradle.api.internal.tasks.testing.filter.TestSelectionMatcher;
 import org.junit.platform.engine.EngineDiscoveryRequest;
+import org.junit.platform.engine.FilterResult;
 import org.junit.platform.launcher.PostDiscoveryFilter;
 
 public class GradleTestNameFilter extends AbstractTestNameFilter {
@@ -41,8 +43,18 @@ public class GradleTestNameFilter extends AbstractTestNameFilter {
     }
 
     @Override
-    protected void initialize(PostDiscoveryFilter filter) throws Exception {
+    protected PostDiscoveryFilter initialize(PostDiscoveryFilter filter) throws Exception {
         this.matcher = Objects.requireNonNull(getTestSelectionMatcher(filter));
+        /*
+        Needed because Gradle's JUnitPlatformTestClassProcessor$ClassMethodNameFilter.shouldRun returns false
+        for unrecognized test sources.
+
+        This hack could be avoided if Gradle changed the return value for unrecognized sources to true.
+         */
+        return object -> object.getSource()
+                .filter(source -> source.getClass().getName().equals(FieldSource.class.getName()))
+                .map(source -> FilterResult.included("Pre-filtered by ArchUnitTestEngine"))
+                .orElseGet(() -> filter.apply(object));
     }
 
     private TestSelectionMatcher getTestSelectionMatcher(PostDiscoveryFilter filter)

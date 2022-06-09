@@ -15,8 +15,10 @@
  */
 package com.tngtech.archunit.junit.filtering;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import com.tngtech.archunit.junit.filtering.TestSelectorFactory.TestSelector;
@@ -34,7 +36,22 @@ public abstract class AbstractTestNameFilter implements TestSourceFilter {
 
     public AbstractTestNameFilter(EngineDiscoveryRequest request, String discoveryFilterClassName) throws Exception {
         this.discoveryFilterClassName = discoveryFilterClassName;
-        initialize(findPostDiscoveryFilter(request));
+        PostDiscoveryFilter postDiscoveryFilter = findPostDiscoveryFilter(request);
+        PostDiscoveryFilter replacement = initialize(postDiscoveryFilter);
+        if (replacement != postDiscoveryFilter) {
+            replaceFilter(request, postDiscoveryFilter, replacement);
+        }
+    }
+
+    private void replaceFilter(
+            EngineDiscoveryRequest discoveryRequest,
+            PostDiscoveryFilter postDiscoveryFilter,
+            PostDiscoveryFilter replacement) throws ReflectiveOperationException {
+        LauncherDiscoveryRequest request = (LauncherDiscoveryRequest) discoveryRequest;
+        List<PostDiscoveryFilter> filters = new ArrayList<>(request.getPostDiscoveryFilters());
+        filters.remove(postDiscoveryFilter);
+        filters.add(replacement);
+        ReflectionUtils.setField(discoveryRequest, "postDiscoveryFilters", filters);
     }
 
     public boolean shouldRun(TestSource source) {
@@ -63,7 +80,7 @@ public abstract class AbstractTestNameFilter implements TestSourceFilter {
         return discoveryFilterClassName.equals(filter.getClass().getName());
     }
 
-    protected abstract void initialize(PostDiscoveryFilter filter) throws Exception;
+    protected abstract PostDiscoveryFilter initialize(PostDiscoveryFilter filter) throws Exception;
 
     protected abstract boolean shouldRunAccordingToTestingTool(TestSelector selector);
 

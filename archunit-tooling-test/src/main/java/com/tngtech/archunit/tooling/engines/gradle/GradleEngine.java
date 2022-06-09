@@ -57,6 +57,7 @@ public enum GradleEngine implements TestEngine {
                 .setStandardError(System.err)
                 .forTasks("test")
                 .withArguments(
+                        "--debug",
                         "--full-stacktrace",
                         "-Ppatterns=" + String.join(",", toTestFilterArguments(testFiles)));
     }

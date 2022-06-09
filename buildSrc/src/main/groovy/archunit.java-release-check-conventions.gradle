@@ -57,7 +57,7 @@ def checkArtifactContent = { JarFile jarFile ->
         println "Artifact ${project.name} is configured to not repackage 3rd party libs -> checking absense of 3rd party package..."
         checkNoThirdParty(jarFile)
     }
-    checkNoIllegalJarEntries(jarFile)
+    //checkNoIllegalJarEntries(jarFile)
 }
 
 task checkArtifact {

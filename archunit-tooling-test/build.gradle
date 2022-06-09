@@ -46,33 +46,34 @@ processTestFixturesResources {
 }
 
 dependencies {
+    implementation project(path: ':archunit-junit5-engine')
+    implementation project(path: ':archunit-junit4')
     implementation dependency.junit5JupiterEngine
     implementation dependency.junit5VintageEngine
     implementation dependency.junitPlatform
+    implementation dependency.junitPlatformLauncher
     implementation dependency.guava
-    implementation 'org.junit.platform:junit-platform-launcher:1.8.2'
-    implementation project(path: ':archunit-junit5-engine')
-    implementation 'com.github.stefanbirkner:system-lambda:1.2.1'
-    implementation 'org.apache.maven.shared:maven-invoker:3.1.0'
-    implementation 'org.apache.maven.surefire:surefire-report-parser:3.0.0-M5'
-    implementation 'commons-io:commons-io:2.11.0'
-    implementation 'org.gradle:gradle-tooling-api:7.3-20210825160000+0000'
-    implementation project(path: ':archunit-junit4')
+    implementation dependency.systemLambda
+    implementation dependency.mavenInvoker
+    implementation dependency.surefireReportParser
+    implementation dependency.commonsIo
+    implementation dependency.gradleToolingApi
+    implementation dependency.surefireSharedUtils
 
-    compileOnly 'com.github.spotbugs:spotbugs-annotations:4.5.3'
+    compileOnly dependency.findBugsAnnotations
 
-    testFixturesImplementation dependency.junitPlatform
-    testFixturesImplementation dependency.junit5JupiterEngine
-    testFixturesImplementation dependency.junit5JupiterApi
     testFixturesImplementation project(path: ':archunit')
     testFixturesImplementation project(path: ':archunit-junit5-engine-api')
     testFixturesImplementation project(path: ':archunit-junit5-api')
     testFixturesImplementation project(path: ':archunit-junit5-engine')
     testFixturesImplementation project(path: ':archunit-junit4')
+    testFixturesImplementation dependency.junitPlatform
+    testFixturesImplementation dependency.junit5JupiterEngine
+    testFixturesImplementation dependency.junit5JupiterApi
 
     testImplementation dependency.assertj
-    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.8.2'
-    testImplementation 'org.junit-pioneer:junit-pioneer:1.6.1'
+    testImplementation dependency.junitJupiterParams
+    testImplementation dependency.junitPioneer
 }
 
 String getMavenRepoPath(Project project) {
