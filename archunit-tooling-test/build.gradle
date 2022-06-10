@@ -30,6 +30,8 @@ sourceSets {
     }
 }
 
+jar.enabled = false
+
 task copyFixtureSources(type: Copy) {
     into new File(project.sourceSets.testFixtures.output.resourcesDir, '@sources')
     from(project.sourceSets.testFixtures.java) {

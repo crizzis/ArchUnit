@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -41,16 +40,15 @@ public enum JUnitJupiterEngine implements TestEngine {
     private final Launcher launcher = LauncherFactory.create();
 
     @Override
-    public TestReport execute(Set<TestFile> testFiles) {
+    public TestReport execute(TestFile testFiles) {
         LauncherDiscoveryRequest request = toDiscoveryRequest(testFiles);
         TestExecutionCollector testExecutionCollector = new TestExecutionCollector();
         launcher.execute(launcher.discover(request), testExecutionCollector);
         return testExecutionCollector.getReport();
     }
 
-    private LauncherDiscoveryRequest toDiscoveryRequest(Set<TestFile> testFiles) {
-        List<DiscoverySelector> selectors = testFiles.stream()
-                .flatMap(this::toSelectors)
+    private LauncherDiscoveryRequest toDiscoveryRequest(TestFile testFile) {
+        List<DiscoverySelector> selectors = toSelectors(testFile)
                 .collect(Collectors.toList());
         LOG.info("Executing request with selectors {}", selectors);
         return LauncherDiscoveryRequestBuilder.request()

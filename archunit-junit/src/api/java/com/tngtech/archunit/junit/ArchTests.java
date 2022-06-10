@@ -65,7 +65,7 @@ public final class ArchTests {
         return new ArchTests(definitionLocation);
     }
 
-    Class<?> getDefinitionLocation() {
+    public Class<?> getDefinitionLocation() {
         return definitionLocation;
     }
 }

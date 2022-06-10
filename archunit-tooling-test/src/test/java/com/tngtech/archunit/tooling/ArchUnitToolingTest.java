@@ -3,7 +3,9 @@ package com.tngtech.archunit.tooling;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import com.tngtech.archunit.tooling.examples.ArchJUnit4SuiteTest;
 import com.tngtech.archunit.tooling.examples.ArchJUnit4Test;
+import com.tngtech.archunit.tooling.examples.ArchJUnit5SuiteTest;
 import com.tngtech.archunit.tooling.examples.ArchJUnit5Test;
 import org.junit.jupiter.api.Disabled;
 import org.junitpioneer.jupiter.cartesian.ArgumentSets;
@@ -43,7 +45,9 @@ public class ArchUnitToolingTest extends BaseTest {
     static Stream<Class<?>> fixtures() {
         return Stream.of(
                 ArchJUnit4Test.class,
-                ArchJUnit5Test.class
+                ArchJUnit5Test.class,
+                ArchJUnit4SuiteTest.class,
+                ArchJUnit5SuiteTest.class
         );
     }
 }

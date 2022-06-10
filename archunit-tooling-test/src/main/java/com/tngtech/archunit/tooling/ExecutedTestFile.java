@@ -22,6 +22,10 @@ public class ExecutedTestFile {
         return Collections.unmodifiableMap(results);
     }
 
+    public int size() {
+        return results.size();
+    }
+
     public Optional<TestResult> getResult(String testCase) {
         return Optional.ofNullable(results.get(testCase))
                 .or(() -> findMatchingParameterizedTestName(testCase).map(results::get));

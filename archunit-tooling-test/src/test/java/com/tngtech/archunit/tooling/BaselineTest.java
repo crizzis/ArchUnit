@@ -1,7 +1,7 @@
 package com.tngtech.archunit.tooling;
 
-import com.tngtech.archunit.tooling.examples.RegularJunit4Test;
-import com.tngtech.archunit.tooling.examples.RegularJunit5Test;
+import com.tngtech.archunit.tooling.examples.RegularJUnit4Test;
+import com.tngtech.archunit.tooling.examples.RegularJUnit5Test;
 import org.junitpioneer.jupiter.cartesian.ArgumentSets;
 import org.junitpioneer.jupiter.cartesian.CartesianTest;
 import org.junitpioneer.jupiter.cartesian.CartesianTest.MethodFactory;
@@ -41,7 +41,7 @@ public class BaselineTest extends BaseTest {
 
     static Stream<Class<?>> fixtures() {
         return Stream.of(
-                RegularJunit5Test.class,
-                RegularJunit4Test.class);
+                RegularJUnit5Test.class,
+                RegularJUnit4Test.class);
     }
 }

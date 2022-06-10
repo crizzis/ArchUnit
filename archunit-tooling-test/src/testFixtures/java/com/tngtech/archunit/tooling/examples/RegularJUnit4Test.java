@@ -11,7 +11,7 @@ import static org.junit.Assume.assumeThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @RunWith(BlockJUnit4ClassRunner.class)
-public class RegularJunit4Test {
+public class RegularJUnit4Test {
 
     @Test
     public void shouldReportSuccess() {

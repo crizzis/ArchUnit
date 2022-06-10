@@ -36,21 +36,21 @@ public enum GradleEngine implements TestEngine {
     }
 
     @Override
-    public TestReport execute(Set<TestFile> testFiles) throws Exception {
+    public TestReport execute(TestFile testFile) throws Exception {
         return withProjectRoot(projectRoot -> {
             projectLayout.applyTo(projectRoot);
             GradleConnector gradleConnector = GradleConnector.newConnector()
                     .useGradleVersion("7.4.2")
                     .forProjectDirectory(projectRoot.toFile());
             try (ProjectConnection connection = gradleConnector.connect()) {
-                BuildLauncher launcher = prepareLauncher(testFiles, connection);
+                BuildLauncher launcher = prepareLauncher(testFile, connection);
                 launcher.run();
                 return parser.parseReports(projectRoot, projectLayout.getTestReportDirectory());
             }
         });
     }
 
-    private BuildLauncher prepareLauncher(Set<TestFile> testFiles, ProjectConnection connection) {
+    private BuildLauncher prepareLauncher(TestFile testFile, ProjectConnection connection) {
         return connection
                 .newBuild()
                 .setStandardOutput(System.out)
@@ -59,14 +59,7 @@ public enum GradleEngine implements TestEngine {
                 .withArguments(
                         "--debug",
                         "--full-stacktrace",
-                        "-Ppatterns=" + String.join(",", toTestFilterArguments(testFiles)));
-    }
-
-    private Collection<String> toTestFilterArguments(Set<TestFile> testFiles) {
-        return testFiles.stream()
-                .map(this::toTestFilterArgument)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+                        "-Ppatterns=" + String.join(",", toTestFilterArgument(testFile)));
     }
 
     private Collection<String> toTestFilterArgument(TestFile testFile) {

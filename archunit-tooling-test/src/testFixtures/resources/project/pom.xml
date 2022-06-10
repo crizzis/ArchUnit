@@ -51,11 +51,6 @@
                 <version>3.0.0-M7</version>
                 <configuration>
                     <forkCount>0</forkCount>
-                    <includeJUnit5Engines>
-                        <engine>junit-jupiter</engine>
-                        <engine>junit-vintage</engine>
-                        <engine>archunit</engine>
-                    </includeJUnit5Engines>
                 </configuration>
             </plugin>
         </plugins>

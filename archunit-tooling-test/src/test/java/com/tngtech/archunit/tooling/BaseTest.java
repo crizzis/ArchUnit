@@ -1,6 +1,5 @@
 package com.tngtech.archunit.tooling;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -24,15 +23,15 @@ public abstract class BaseTest {
         TestFile testFile = new TestFile(fixture);
 
         // when
-        TestReport report = engine.execute(Collections.singleton(testFile));
-        ExecutedTestFile actual = findResult(report, testFile.getFixture());
+        TestReport report = engine.execute(testFile);
+        TestResults actual = TestResults.of(report, testFile);
 
         // then
         assertThat(actual.hasInitializationError()).isFalse();
-        assertThat(actual.getResult("shouldReportSuccess").get()).isEqualTo(SUCCESS);
-        assertThat(actual.getResult("shouldReportFailure").get()).isEqualTo(FAILURE);
-        assertThat(actual.getResult("shouldReportError").get()).isEqualTo(engine.reportsErrors() ? ERROR : FAILURE);
-        assertThat(actual.getResult("shouldBeSkipped").get()).isEqualTo(SKIPPED);
+        assertThat(actual.getResult("shouldReportSuccess")).isEqualTo(SUCCESS);
+        assertThat(actual.getResult("shouldReportFailure")).isEqualTo(FAILURE);
+        assertThat(actual.getResult("shouldReportError")).isEqualTo(engine.reportsErrors() ? ERROR : FAILURE);
+        assertThat(actual.getResult("shouldBeSkipped")).isEqualTo(SKIPPED);
     }
 
     void shouldOnlyExecuteSelectedTests(TestEngine engine, Class<?> fixture) throws Exception {
@@ -40,13 +39,13 @@ public abstract class BaseTest {
         TestFile testFile = new TestFile(fixture, "shouldReportSuccess");
 
         // when
-        TestReport report = engine.execute(Collections.singleton(testFile));
-        ExecutedTestFile actual = findResult(report, testFile.getFixture());
+        TestReport report = engine.execute(testFile);
+        TestResults actual = TestResults.of(report, testFile);
 
         // then
         assertThat(actual.hasInitializationError()).isFalse();
-        assertThat(actual.getResult("shouldReportSuccess").isPresent()).isTrue();
-        assertThat(actual.getResults()).hasSize(1);
+        assertThat(actual.hasResult("shouldReportSuccess")).isTrue();
+        assertThat(actual.resultCount()).isEqualTo(1);
     }
 
     void shouldConditionallyIgnoreTest(TestEngine engine, Class<?> fixture, Map.Entry<String, ExecutedTestFile.TestResult> resultForEnvVar) throws Exception {
@@ -56,18 +55,14 @@ public abstract class BaseTest {
         TestFile testFile = new TestFile(fixture, "shouldBeSkippedConditionally");
 
         // when
-        ExecutedTestFile actual = withEnvironmentVariable("SKIP_BY_ENV_VARIABLE", envValue).execute(() -> {
-            TestReport report = engine.execute(Collections.singleton(testFile));
-            return findResult(report, fixture);
+        TestResults actual = withEnvironmentVariable("SKIP_BY_ENV_VARIABLE", envValue).execute(() -> {
+            TestReport report = engine.execute(testFile);
+            return TestResults.of(report, testFile);
         });
 
         // then
         assertThat(actual.hasInitializationError()).isFalse();
-        assertThat(actual.getResult("shouldBeSkippedConditionally").get()).isEqualTo(result);
-    }
-
-    private ExecutedTestFile findResult(TestReport report, Class<?> fixture) {
-        return report.getFile(fixture.getName()).get();
+        assertThat(actual.getResult("shouldBeSkippedConditionally")).isEqualTo(result);
     }
 
     @SuppressWarnings("unused")

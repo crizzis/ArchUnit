@@ -41,8 +41,18 @@ public class TestFile {
         return Objects.nonNull(testCases);
     }
 
+    public boolean isSuite() {
+        return fixture.getSimpleName().contains("Suite");
+    }
+
     public TestingFramework getTestingFramework() {
-        return TestingFramework.JUNIT5;
+        if (fixture.getSimpleName().contains("JUnit4")) {
+            return TestingFramework.JUNIT4;
+        }
+        if (fixture.getSimpleName().contains("JUnit5")) {
+            return TestingFramework.JUNIT5;
+        }
+        throw new IllegalStateException("Could not determine testing framework");
     }
 
     public enum TestingFramework {

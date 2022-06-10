@@ -133,7 +133,7 @@ class ArchUnitTestDescriptor extends AbstractArchUnitTestDescriptor implements C
                 .ifRequestedButUnresolved((clazz, childResolver) -> {
                     ArchUnitArchTestsDescriptor rulesDescriptor = new ArchUnitArchTestsDescriptor(childResolver, archTests, classes, field);
                     parent.addChild(rulesDescriptor);
-                    rulesDescriptor.createChildren(childResolver, filter);
+                    rulesDescriptor.createChildren(childResolver, TestSourceFilter.NOOP);
                 });
     }
 

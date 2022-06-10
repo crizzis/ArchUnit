@@ -4,12 +4,14 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Properties;
-import java.util.Set;
-import java.util.stream.Collectors;
+
+import javax.annotation.Nonnull;
 
 import com.tngtech.archunit.tooling.TestEngine;
 import com.tngtech.archunit.tooling.TestFile;
@@ -69,7 +71,7 @@ public enum MavenSurefireEngine implements TestEngine {
     }
 
     @Override
-    public TestReport execute(Set<TestFile> testFiles) throws Exception {
+    public TestReport execute(TestFile testFiles) throws Exception {
         return withProjectRoot(projectRoot -> {
             MavenProject mavenProject = prepareProjectDirectory(projectRoot);
             InvocationRequest request = prepareInvocationRequest(mavenProject, testFiles);
@@ -100,28 +102,39 @@ public enum MavenSurefireEngine implements TestEngine {
     }
 
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
-    private InvocationRequest prepareInvocationRequest(MavenProject mavenProject, Set<TestFile> testFiles) {
+    private InvocationRequest prepareInvocationRequest(MavenProject mavenProject, TestFile testFile) {
         InvocationRequest request = new DefaultInvocationRequest();
         request.setBaseDirectory(Objects.requireNonNull(mavenProject.getPomXml().getParent()).toFile());
         request.setPomFile(mavenProject.getPomXml().toFile());
         request.setGoals(Collections.singletonList(goal));
-        request.setProperties(propertiesWithTest(toTestProperty(testFiles)));
+        request.setProperties(propertiesForTest(testFile));
         request.setMavenOpts("-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8000");
         request.setDebug(false);
         request.setShowErrors(true);
         return request;
     }
 
-    private Properties propertiesWithTest(String filter) {
+    private Properties propertiesForTest(TestFile testFile) {
         Properties result = new Properties();
-        result.setProperty("test", filter);
+        result.setProperty("test", toIncludePattern(testFile));
+        result.setProperty("surefire.includeJUnit5Engines", String.join(",", resolveJUnitEngines(testFile)));
         return result;
     }
 
-    private String toTestProperty(Set<TestFile> testFiles) {
-        return testFiles.stream()
-                .map(this::toIncludePattern)
-                .collect(Collectors.joining(","));
+    @Nonnull
+    private List<String> resolveJUnitEngines(TestFile testFile) {
+        /* TODO configuration issue:
+            If archunit and junit-vintage are both included, then ArchUnit tests are being run twice (since they are discoverable by both engines).
+            This behavior should either be suppressed somehow or, at the very least, clearly stated in the docs.
+
+            (the former could be done by having ArchUnitTestEngine detect if JUnit Vintage is configured to run, and if so - skip JUnit 4 tests
+            during discovery. There does not, however, seem to exist a foolproof way of detecting whether a given engine is configured to run)
+        */
+        if (TestFile.TestingFramework.JUNIT4.equals(testFile.getTestingFramework())
+                && testFile.getFixture().getSimpleName().contains("Arch")) {
+            return Arrays.asList("junit-jupiter", "archunit");
+        }
+        return Arrays.asList("junit-jupiter", "junit-vintage", "archunit");
     }
 
     private String toIncludePattern(TestFile testFile) {

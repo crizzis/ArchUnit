@@ -6,7 +6,7 @@ import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class RegularJunit5Test {
+public class RegularJUnit5Test {
 
     @Test
     void shouldReportSuccess() {
