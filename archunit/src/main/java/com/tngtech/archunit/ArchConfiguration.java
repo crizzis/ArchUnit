@@ -52,6 +52,8 @@ public final class ArchConfiguration {
     public static final String ENABLE_MD5_IN_CLASS_SOURCES = "enableMd5InClassSources";
     private static final String EXTENSION_PREFIX = "extension";
 
+    public static final String JUNIT_PREFIX = "junit";
+
     private static final Logger LOG = LoggerFactory.getLogger(ArchConfiguration.class);
 
     private static final Supplier<ArchConfiguration> INSTANCE = Suppliers.memoize(ArchConfiguration::new);

@@ -17,12 +17,17 @@ package com.tngtech.archunit.junit.internal.filtering;
 
 import com.tngtech.archunit.junit.internal.ArchUnitEngineDescriptor;
 import com.tngtech.archunit.junit.internal.ArchUnitTestEngine;
+import com.tngtech.archunit.junit.internal.filtering.surefire.SurefireTestNameFilter;
 import org.junit.platform.engine.EngineDiscoveryRequest;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.TestSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @FunctionalInterface
 public interface TestSourceFilter {
+    Logger LOG = LoggerFactory.getLogger(ArchUnitTestEngine.class);
+
     TestSourceFilter NOOP = (descriptor -> true);
 
     default boolean shouldRun(TestDescriptor descriptor) {
@@ -34,6 +39,13 @@ public interface TestSourceFilter {
     boolean shouldRun(TestSource source);
 
     static TestSourceFilter forRequest(EngineDiscoveryRequest discoveryRequest, ArchUnitEngineDescriptor engineDescriptor) {
+        try {
+            if (SurefireTestNameFilter.appliesTo(discoveryRequest)) {
+                return new SurefireTestNameFilter(discoveryRequest);
+            }
+        } catch (Exception e) {
+            LOG.warn("Received error trying to apply test name filter from testing tool", e);
+        }
         return TestSourceFilter.NOOP;
     }
 }

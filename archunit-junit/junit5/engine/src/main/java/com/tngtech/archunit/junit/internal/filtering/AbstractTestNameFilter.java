@@ -115,7 +115,7 @@ public abstract class AbstractTestNameFilter implements TestSourceFilter {
         return discoveryFilterClassName.equals(filter.getClass().getName());
     }
 
-    protected Optional<PostDiscoveryFilter> initialize(PostDiscoveryFilter filter) {
+    protected Optional<PostDiscoveryFilter> initialize(PostDiscoveryFilter filter) throws Exception {
         return Optional.empty();
     }
 
