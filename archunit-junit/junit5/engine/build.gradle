@@ -10,9 +10,14 @@ dependencies {
     api project(path: ':archunit')
     api project(path: ':archunit-junit5-api')
     api project(path: ':archunit-junit5-engine-api')
+
     implementation project(path: ':archunit-junit')
     dependency.addGuava { dependencyNotation, config -> implementation(dependencyNotation, config) }
     implementation dependency.slf4j
+    implementation dependency.junitPlatformLauncher
+
+    compileOnly dependency.findBugsAnnotations
+    compileOnly dependency.surefireApi
 
     testImplementation project(path: ':archunit', configuration: 'tests')
     testImplementation dependency.assertj
@@ -46,14 +51,6 @@ test {
 
 shadowJar {
     exclude 'META-INF/maven/**'
-
-    dependencies {
-        exclude(dependency {
-            def isApi = it.configuration == 'archJunitApi'
-            def isUnwantedDependency = it.name != dependency.guava && it.moduleName != 'archunit-junit'
-            isUnwantedDependency || isApi
-        })
-    }
 }
 
 def configureDependencies = { deps ->
@@ -61,8 +58,12 @@ def configureDependencies = { deps ->
         dep.scope.text() != 'compile' || !(dep.artifactId.text() in ['archunit', 'archunit-junit5-api', 'archunit-junit5-engine-api'])
     }
 }
+
 this.with project(':archunit-junit').configureJUnitArchive(configureDependencies)
 
 singlePackageExport {
     exportedPackage = 'com.tngtech.archunit.junit.internal'
 }
+
+checkExportedPackage.enabled = false
+checkArtifact.enabled = false
