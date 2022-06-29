@@ -1,5 +1,6 @@
 plugins {
     id 'archunit.java-release-conventions'
+    id 'java-test-fixtures'
 }
 
 ext.moduleName = 'com.tngtech.archunit.junit5.engine'
@@ -10,14 +11,19 @@ dependencies {
     api project(path: ':archunit')
     api project(path: ':archunit-junit5-api')
     api project(path: ':archunit-junit5-engine-api')
+
     implementation project(path: ':archunit-junit')
     dependency.addGuava { dependencyNotation, config -> implementation(dependencyNotation, config) }
     implementation dependency.slf4j
+    implementation dependency.junitPlatformLauncher
+
+    compileOnly dependency.findBugsAnnotations
 
     testImplementation project(path: ':archunit', configuration: 'tests')
     testImplementation dependency.assertj
     testImplementation dependency.mockito
     testImplementation dependency.junit5JupiterApi
+    testImplementation dependency.junitJupiterParams
 
     testRuntimeOnly dependency.junit5JupiterEngine
 }
@@ -62,7 +68,3 @@ def configureDependencies = { deps ->
     }
 }
 this.with project(':archunit-junit').configureJUnitArchive(configureDependencies)
-
-singlePackageExport {
-    exportedPackage = 'com.tngtech.archunit.junit.internal'
-}
